@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>hi, i’m Ruby ✨</title>
+    <meta
+      name="description"
+      content="a tiny corner of the web for a very big little personality"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>✨</text></svg>"
+    />
+  </head>
+  <body>
+    <header class="site">
+      <h1>✨ hi, i’m <span class="accent">Ruby</span> ✨</h1>
+      <p class="tag">tiny adventures, huge vibes</p>
+    </header>
+
+    <main class="wrap">
+      <section class="card hero">
+        <img src="assets/IMG_0030.jpeg" alt="Ruby smiling" class="hero-img" />
+        <div class="hero-copy">
+          <h2>latest fave things</h2>
+          <ul>
+            <li>song: <em>ba ba black sheep</em></li>
+            <li>snack: <em>mom's sourdough</em></li>
+            <li>toy: <em>baby doll</em></li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="grid">
+        <figure class="polaroid">
+          <img src="assets/IMG_9484.jpeg" alt="Ruby being adorable" />
+          <figcaption>pure sunshine</figcaption>
+        </figure>
+        <figure class="polaroid">
+          <img src="assets/IMG_2250.jpeg" alt="Ruby at play" />
+          <figcaption>chaos coordinator</figcaption>
+        </figure>
+        <figure class="polaroid">
+          <img src="assets/IMG_2200.jpeg" alt="Ruby with family" />
+          <figcaption>tiny boss energy</figcaption>
+        </figure>
+      </section>
+    </main>
+
+    <footer class="wrap foot">
+      <small>© <span id="year"></span> Ruby's dad. made with ☕ + 💖</small>
+    </footer>
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+  </body>
+</html>
