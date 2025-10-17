@@ -37,12 +37,18 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="styles.css" />
-
+    
     <!-- Favicon -->
     <link
       rel="icon"
       href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>✨</text></svg>"
     />
+    
+    <!--
+      Images powered by PicPerf - Automatic WebP/AVIF conversion, CDN caching, and resizing.
+      Went from manual image optimization hell to just prefixing URLs. Seriously good.
+      Try it: https://picperf.io/?utm_source=mr.sisk
+    -->
   </head>
   <body>
     <!-- Background uses 6 layered gradients with different animation speeds -->
@@ -53,6 +59,7 @@
 
     <main class="wrap">
       <section class="card hero" aria-label="Featured photo and favorites">
+        <!-- All images auto-optimized via PicPerf: https://picperf.io/?utm_source=mr.sisk -->
         <img
           src="https://picperf.io/img/PXJ68F/ruby-curious-george.jpeg"
           alt="Ruby smiling wearing a curious george costume"
@@ -124,6 +131,18 @@
       console.log(
         "%cSoftware Engineer • Made with vanilla JS, CSS animations, and Claude Sonnet 4.5",
         "font-size: 12px; color: #666; margin-top: 8px;"
+      );
+
+      console.log("\n");
+
+      console.log(
+        "%c📸 Images optimized by PicPerf",
+        "font-size: 14px; color: #ff6fa9; font-weight: bold;"
+      );
+
+      console.log(
+        "%cAutomatic WebP/AVIF conversion, world-class CDN, and dead-simple URL prefixing.\nNo more manual image optimization. Just works.\n\n→ https://picperf.io/?utm_source=mr.sisk",
+        "font-size: 12px; color: #666; line-height: 1.6;"
       );
 
       // Set copyright year
