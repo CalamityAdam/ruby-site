@@ -34,7 +34,7 @@
           class="hero-img"
         />
         <div class="hero-copy">
-          <h2>latest fave things</h2>
+          <h2>latest favorite things</h2>
           <ul>
             <li>song: <em>ba ba black sheep</em></li>
             <li>snack: <em>mom's sourdough</em></li>
@@ -71,8 +71,33 @@
     <footer class="wrap foot">
       <small>© <span id="year"></span> Ruby's dad. made with ☕ + 💖</small>
     </footer>
+
     <script>
       document.getElementById("year").textContent = new Date().getFullYear();
+
+      // Create magical floating sparkles
+      function createSparkle() {
+        const sparkle = document.createElement("div");
+        sparkle.className = "sparkle";
+        sparkle.innerHTML = ["✨", "⭐", "💫", "🌟"][
+          Math.floor(Math.random() * 4)
+        ];
+        sparkle.style.left = Math.random() * 100 + "vw";
+        sparkle.style.animationDuration = Math.random() * 3 + 2 + "s";
+        sparkle.style.opacity = Math.random() * 0.5 + 0.3;
+        sparkle.style.fontSize = Math.random() * 1 + 0.5 + "rem";
+        document.body.appendChild(sparkle);
+
+        setTimeout(() => sparkle.remove(), 5000);
+      }
+
+      // Create sparkles periodically
+      setInterval(createSparkle, 800);
+
+      // Create initial burst
+      for (let i = 0; i < 5; i++) {
+        setTimeout(createSparkle, i * 200);
+      }
     </script>
   </body>
 </html>
