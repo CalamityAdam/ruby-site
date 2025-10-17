@@ -3,18 +3,31 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>hi, i’m Ruby ✨</title>
+    <title>hi, i'm Ruby ✨</title>
     <meta
       name="description"
       content="a tiny corner of the web for a very big little personality"
     />
+    <meta name="theme-color" content="#ffe6f3" />
+    <meta name="color-scheme" content="light" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="hi, i'm Ruby ✨" />
+    <meta property="og:description" content="tiny adventures, huge vibes" />
+    <meta property="og:type" content="website" />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap"
       rel="stylesheet"
     />
+
+    <!-- Styles -->
     <link rel="stylesheet" href="styles.css" />
+
+    <!-- Favicon -->
     <link
       rel="icon"
       href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>✨</text></svg>"
@@ -27,11 +40,14 @@
     </header>
 
     <main class="wrap">
-      <section class="card hero">
+      <section class="card hero" aria-label="Featured photo and favorites">
         <img
           src="https://picperf.io/img/PXJ68F/ruby-curious-george.jpeg"
           alt="Ruby smiling wearing a curious george costume"
           class="hero-img"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
         />
         <div class="hero-copy">
           <h2>latest favorite things</h2>
@@ -43,25 +59,31 @@
         </div>
       </section>
 
-      <section class="grid">
-        <figure class="polaroid">
+      <section class="grid" aria-label="Photo gallery">
+        <figure class="polaroid" tabindex="0">
           <img
             src="https://picperf.io/img/PXJ68F/ruby-sunshine.jpeg"
             alt="Ruby being adorable"
+            loading="lazy"
+            decoding="async"
           />
           <figcaption>pure sunshine</figcaption>
         </figure>
-        <figure class="polaroid">
+        <figure class="polaroid" tabindex="0">
           <img
             src="https://picperf.io/img/PXJ68F/ruby-icecream.jpeg"
             alt="Ruby eating ice cream"
+            loading="lazy"
+            decoding="async"
           />
           <figcaption>chaos coordinator</figcaption>
         </figure>
-        <figure class="polaroid">
+        <figure class="polaroid" tabindex="0">
           <img
             src="https://picperf.io/img/PXJ68F/ruby-and-megan.jpeg"
             alt="Ruby and Mom"
+            loading="lazy"
+            decoding="async"
           />
           <figcaption>tiny boss energy</figcaption>
         </figure>
@@ -69,35 +91,68 @@
     </main>
 
     <footer class="wrap foot">
-      <small>© <span id="year"></span> Ruby's dad. made with ☕ + 💖</small>
+      <small
+        >© <span id="year"></span> Ruby's dad. made with ☕ + 💖 + 🤖</small
+      >
     </footer>
 
     <script>
+      // Set copyright year
       document.getElementById("year").textContent = new Date().getFullYear();
 
-      // Create magical floating sparkles
-      function createSparkle() {
-        const sparkle = document.createElement("div");
-        sparkle.className = "sparkle";
-        sparkle.innerHTML = ["✨", "⭐", "💫", "🌟"][
-          Math.floor(Math.random() * 4)
-        ];
-        sparkle.style.left = Math.random() * 100 + "vw";
-        sparkle.style.animationDuration = Math.random() * 3 + 2 + "s";
-        sparkle.style.opacity = Math.random() * 0.5 + 0.3;
-        sparkle.style.fontSize = Math.random() * 1 + 0.5 + "rem";
-        document.body.appendChild(sparkle);
+      // Respect user's motion preferences
+      const prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
 
-        setTimeout(() => sparkle.remove(), 5000);
+      if (!prefersReducedMotion) {
+        // Create magical floating sparkles
+        const sparkleEmojis = ["✨", "⭐", "💫", "🌟"];
+        let lastSparkleTime = 0;
+        const sparkleInterval = 800;
+
+        function createSparkle() {
+          const sparkle = document.createElement("div");
+          sparkle.className = "sparkle";
+          sparkle.textContent =
+            sparkleEmojis[Math.floor(Math.random() * sparkleEmojis.length)];
+          sparkle.style.left = Math.random() * 100 + "vw";
+          sparkle.style.animationDuration = Math.random() * 3 + 2 + "s";
+          sparkle.style.opacity = Math.random() * 0.5 + 0.3;
+          sparkle.style.fontSize = Math.random() * 1 + 0.5 + "rem";
+          document.body.appendChild(sparkle);
+
+          setTimeout(() => sparkle.remove(), 5000);
+        }
+
+        // Use RAF for better performance
+        function sparkleLoop(timestamp) {
+          if (timestamp - lastSparkleTime >= sparkleInterval) {
+            createSparkle();
+            lastSparkleTime = timestamp;
+          }
+          requestAnimationFrame(sparkleLoop);
+        }
+
+        // Create initial burst
+        for (let i = 0; i < 5; i++) {
+          setTimeout(createSparkle, i * 200);
+        }
+
+        // Start the loop
+        requestAnimationFrame(sparkleLoop);
       }
 
-      // Create sparkles periodically
-      setInterval(createSparkle, 800);
+      // Keyboard navigation hint
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Tab") {
+          document.body.classList.add("keyboard-nav");
+        }
+      });
 
-      // Create initial burst
-      for (let i = 0; i < 5; i++) {
-        setTimeout(createSparkle, i * 200);
-      }
+      document.addEventListener("mousedown", function () {
+        document.body.classList.remove("keyboard-nav");
+      });
     </script>
   </body>
 </html>
