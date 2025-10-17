@@ -1,4 +1,15 @@
 <!DOCTYPE html>
+<!--
+  Built by Adam Sisk
+  https://adamsisk.info
+  
+  Tech stack:
+  - Vanilla HTML/CSS/JS
+  - Claude Sonnet 4.5 for effects
+  - Zero frameworks
+  
+  Check the console for more info.
+-->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -34,8 +45,9 @@
     />
   </head>
   <body>
+    <!-- Background uses 6 layered gradients with different animation speeds -->
     <header class="site">
-      <h1>✨ hi, i’m <span class="accent">Ruby</span> ✨</h1>
+      <h1>✨ hi, i'm <span class="accent">Ruby</span> ✨</h1>
       <p class="tag">tiny adventures, huge vibes</p>
     </header>
 
@@ -59,6 +71,7 @@
         </div>
       </section>
 
+      <!-- Polaroids use CSS custom properties for rotation angles and staggered float animations -->
       <section class="grid" aria-label="Photo gallery">
         <figure class="polaroid" tabindex="0">
           <img
@@ -97,6 +110,22 @@
     </footer>
 
     <script>
+      // Console info for curious devs
+      console.log(
+        "%cBuilt by Adam Sisk",
+        "font-size: 20px; font-weight: bold; color: #ff6fa9; padding: 10px 0;"
+      );
+
+      console.log(
+        "%chttps://adamsisk.info",
+        "font-size: 16px; color: #2b2b2b; background: #ffe6f3; padding: 6px 12px; border-radius: 4px;"
+      );
+
+      console.log(
+        "%cSoftware Engineer • Made with vanilla JS, CSS animations, and Claude Sonnet 4.5",
+        "font-size: 12px; color: #666; margin-top: 8px;"
+      );
+
       // Set copyright year
       document.getElementById("year").textContent = new Date().getFullYear();
 
@@ -106,7 +135,7 @@
       ).matches;
 
       if (!prefersReducedMotion) {
-        // Create magical floating sparkles
+        // Sparkle animation using RAF for 60fps performance
         const sparkleEmojis = ["✨", "⭐", "💫", "🌟"];
         let lastSparkleTime = 0;
         const sparkleInterval = 800;
@@ -125,7 +154,6 @@
           setTimeout(() => sparkle.remove(), 5000);
         }
 
-        // Use RAF for better performance
         function sparkleLoop(timestamp) {
           if (timestamp - lastSparkleTime >= sparkleInterval) {
             createSparkle();
@@ -134,16 +162,14 @@
           requestAnimationFrame(sparkleLoop);
         }
 
-        // Create initial burst
         for (let i = 0; i < 5; i++) {
           setTimeout(createSparkle, i * 200);
         }
 
-        // Start the loop
         requestAnimationFrame(sparkleLoop);
       }
 
-      // Keyboard navigation hint
+      // Keyboard navigation focus management
       document.addEventListener("keydown", function (e) {
         if (e.key === "Tab") {
           document.body.classList.add("keyboard-nav");
