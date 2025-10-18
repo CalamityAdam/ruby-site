@@ -78,53 +78,14 @@ body {
   font-family: "Quicksand", system-ui, -apple-system, Segoe UI, Roboto,
     Helvetica, Arial, sans-serif;
   color: var(--fg);
-  background: radial-gradient(
-      circle at 20% 80%,
-      rgba(255, 182, 193, 0.4) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at 80% 20%,
-      rgba(173, 216, 230, 0.4) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at 40% 40%,
-      rgba(255, 218, 185, 0.3) 0%,
-      transparent 40%
-    ),
-    radial-gradient(1200px 600px at 10% 0%, #ffe6f3 0, transparent 60%),
+  background: radial-gradient(1200px 600px at 10% 0%, #ffe6f3 0, transparent 60%),
     radial-gradient(800px 400px at 90% 10%, #e9f5ff 0, transparent 60%),
     linear-gradient(135deg, #fff7fb 0%, #ffeef8 50%, #f0f9ff 100%);
-  background-size: 200% 200%, 200% 200%, 200% 200%, 100% 100%, 100% 100%,
-    100% 100%;
+  background-size: 100% 100%, 100% 100%, 100% 100%;
   animation: gradient-shift 15s ease infinite;
   min-height: 100vh;
   overflow-x: hidden;
   will-change: background-position;
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">✨</text></svg>')
-      12 12,
-    auto;
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  background-image: radial-gradient(
-      circle,
-      rgba(255, 255, 255, 0.8) 1px,
-      transparent 1px
-    ),
-    radial-gradient(circle, rgba(255, 182, 193, 0.4) 1px, transparent 1px);
-  background-size: 50px 50px, 80px 80px;
-  background-position: 0 0, 40px 40px;
-  opacity: 0.3;
-  pointer-events: none;
-  z-index: -1;
 }
 
 .site {
@@ -252,17 +213,6 @@ body::before {
   will-change: transform;
 }
 
-.polaroid::after {
-  content: "✨";
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 1.5rem;
-  opacity: 0;
-  transform: scale(0) rotate(0deg);
-  transition: all 0.3s ease;
-}
-
 .polaroid:hover,
 .polaroid:focus {
   transform: rotate(0deg) translateY(-15px) scale(1.05);
@@ -270,12 +220,6 @@ body::before {
     0 10px 25px rgba(255, 111, 169, 0.3), inset 0 1px 0 rgba(255, 255, 255, 1);
   animation-play-state: paused;
   outline: none;
-}
-
-.polaroid:hover::after,
-.polaroid:focus::after {
-  opacity: 1;
-  transform: scale(1) rotate(180deg);
 }
 
 .polaroid:nth-child(1) {
@@ -328,33 +272,6 @@ body::before {
   opacity: 1;
 }
 
-/* Floating sparkles */
-.sparkle {
-  position: fixed;
-  pointer-events: none;
-  z-index: 9999;
-  animation: sparkle-float 5s ease-in forwards;
-  user-select: none;
-}
-
-@keyframes sparkle-float {
-  0% {
-    transform: translateY(100vh) rotate(0deg) scale(0);
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-    transform: translateY(90vh) rotate(45deg) scale(1);
-  }
-  90% {
-    opacity: 1;
-    transform: translateY(-10vh) rotate(315deg) scale(1);
-  }
-  100% {
-    transform: translateY(-20vh) rotate(360deg) scale(0);
-    opacity: 0;
-  }
-}
 
 /* Keyboard navigation focus states */
 .keyboard-nav *:focus {
@@ -390,23 +307,6 @@ button:focus {
   transform: scale(1.1) rotate(-5deg);
 }
 
-h1:hover {
-  animation: wiggle 0.5s ease;
-}
-
-@keyframes wiggle {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  25% {
-    transform: rotate(-2deg);
-  }
-  75% {
-    transform: rotate(2deg);
-  }
-}
-
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -434,6 +334,357 @@ h1:hover {
   }
 }
 
+/* ============================================
+   NEW FEATURES STYLING
+   WHY: All new interactive features need styles
+   ============================================ */
+
+/* Mobile Touch Optimizations */
+/* WHY: touch-action prevents double-tap zoom on interactive elements */
+.feature-btn,
+.polaroid,
+button,
+.accent {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Feature Toggle Buttons */
+/* WHY: Fixed positioning keeps controls accessible, emoji buttons are touch-friendly */
+.feature-buttons {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 10000;
+}
+
+.feature-btn {
+  width: 50px;
+  height: 50px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 250, 255, 0.8));
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(255, 111, 169, 0.3);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 2px solid rgba(255, 111, 169, 0.2);
+}
+
+.feature-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(255, 111, 169, 0.5);
+}
+
+.feature-btn:active {
+  transform: scale(0.95);
+}
+
+.feature-btn.active {
+  background: linear-gradient(135deg, #ff6fa9, #ff8fc7);
+  box-shadow: 0 6px 25px rgba(255, 111, 169, 0.6);
+  animation: pulse-active 2s ease infinite;
+}
+
+@keyframes pulse-active {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Rainbow Trail Canvas */
+/* WHY: Full-screen canvas, hidden by default */
+.rainbow-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9996;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.rainbow-canvas.active {
+  opacity: 1;
+}
+
+/* Greeting Overlay */
+/* WHY: Slide-in animation from top, auto-dismisses */
+.greeting-overlay {
+  position: fixed;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 247, 251, 0.9));
+  backdrop-filter: blur(15px);
+  padding: 1rem 2rem;
+  border-radius: 20px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--accent);
+  box-shadow: 0 10px 40px rgba(255, 111, 169, 0.3);
+  z-index: 10001;
+  transition: top 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  white-space: nowrap;
+}
+
+.greeting-overlay.active {
+  top: 100px;
+}
+
+
+/* Particle Burst Styling */
+/* WHY: Lightweight divs with GPU-accelerated transforms */
+.particle-burst {
+  will-change: transform, opacity;
+  user-select: none;
+}
+
+/* Bubble Game Styling */
+/* WHY: Fixed positioning for free-floating bubbles, smooth animations */
+.bubble {
+  will-change: transform, opacity;
+  user-select: none;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
+}
+
+.bubble:hover {
+  transform: scale(1.1);
+}
+
+.bubble:active {
+  transform: scale(0.9);
+}
+
+
+/* Close button styling for camera */
+.close-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+/* AR Camera */
+/* WHY: Full-screen camera interface, video and canvas overlay */
+.ar-camera {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: black;
+  z-index: 10006;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.ar-camera.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.camera-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.6), transparent);
+  z-index: 2;
+}
+
+.filter-selector {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
+  justify-content: center;
+  overflow-x: auto;
+  padding: 0 1rem;
+}
+
+.filter-btn {
+  width: 50px;
+  height: 50px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  font-size: 1.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 111, 169, 0.8);
+  transform: scale(1.1);
+}
+
+.camera-viewport {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.camera-viewport video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.camera-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.camera-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.6), transparent);
+  z-index: 2;
+}
+
+.capture-btn {
+  width: 70px;
+  height: 70px;
+  border: 4px solid white;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  font-size: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.capture-btn:hover {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.capture-btn:active {
+  transform: scale(0.95);
+}
+
+.switch-btn {
+  width: 50px;
+  height: 50px;
+  border: 2px solid white;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.switch-btn:hover {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Cursor Friends (Desktop Only) */
+/* WHY: Desktop-only cute followers, hidden on mobile */
+.cursor-friend {
+  transition: opacity 0.3s ease;
+  user-select: none;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+/* Disco Mode */
+/* WHY: Konami code easter egg, rainbow animations everywhere */
+/* NO body animations - just animate child elements to prevent resize */
+
+.disco-mode .card,
+.disco-mode .polaroid {
+  animation: disco-rotate 1s linear infinite, pulse-glow 0.5s ease-in-out infinite !important;
+}
+
+.disco-mode .accent {
+  animation: disco-text 1s linear infinite !important;
+}
+
+.disco-mode .hero-img,
+.disco-mode .polaroid img {
+  animation: disco-hue 2s linear infinite;
+}
+
+@keyframes disco-rotate {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+@keyframes disco-text {
+  0% { filter: hue-rotate(0deg) saturate(200%); }
+  100% { filter: hue-rotate(360deg) saturate(200%); }
+}
+
+@keyframes disco-hue {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+/* Birthday Mode */
+/* WHY: Special styling for Ruby's birthday */
+/* NO body animations - just style changes to prevent resize */
+
+.birthday-mode .card {
+  border-color: gold;
+  box-shadow: 0 0 40px rgba(255, 215, 0, 0.6), 0 15px 50px rgba(0, 0, 0, 0.1);
+  animation: birthday-glow 2s ease-in-out infinite;
+}
+
+@keyframes birthday-glow {
+  0%, 100% {
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.6), 0 15px 50px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 60px rgba(255, 215, 0, 0.9), 0 20px 60px rgba(0, 0, 0, 0.15);
+  }
+}
+
 /* Mobile optimizations */
 @media (max-width: 800px) {
   .hero {
@@ -447,11 +698,41 @@ h1:hover {
     animation: none;
   }
 
-  .sparkle {
+  body {
+    cursor: auto;
+  }
+
+  /* WHY: Stack feature buttons vertically on mobile for thumb reach */
+  .feature-buttons {
+    top: auto;
+    bottom: 20px;
+    right: 20px;
+    flex-direction: row;
+  }
+
+  .feature-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 1.3rem;
+  }
+
+  /* WHY: Larger touch targets for mobile */
+  .close-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 1.8rem;
+  }
+
+  /* WHY: Hide cursor friends on mobile (not needed for touch) */
+  .cursor-friend {
     display: none;
   }
 
-  body {
-    cursor: auto;
+}
+
+/* Landscape mobile optimization */
+@media (max-width: 800px) and (orientation: landscape) {
+  .greeting-overlay.active {
+    top: 20px;
   }
 }

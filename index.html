@@ -2,24 +2,29 @@
 <!--
   Built by Adam Sisk
   https://adamsisk.info
-  
+
   Tech stack:
   - Vanilla HTML/CSS/JS
   - Claude Sonnet 4.5 for effects
   - Zero frameworks
-  
-  Check the console for more info.
+
+  Check the console for more info and hidden easter eggs!
 -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--
+      Mobile optimization: user-scalable=no prevents double-tap zoom issues
+      maximum-scale=1 works with touch-action CSS to eliminate tap delay
+      WHY: Kids will tap rapidly, we don't want accidental zooming
+    -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
     <title>hi, i'm Ruby ✨</title>
     <meta
       name="description"
       content="a tiny corner of the web for a very big little personality"
     />
-    <meta name="theme-color" content="#ffe6f3" />
+    <meta name="theme-color" content="#ffe6f3" id="theme-color-meta" />
     <meta name="color-scheme" content="light" />
 
     <!-- Open Graph -->
@@ -37,13 +42,13 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="styles.css" />
-    
+
     <!-- Favicon -->
     <link
       rel="icon"
       href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>✨</text></svg>"
     />
-    
+
     <!--
       Images powered by PicPerf - Automatic WebP/AVIF conversion, CDN caching, and resizing.
       Went from manual image optimization hell to just prefixing URLs. Seriously good.
@@ -52,13 +57,43 @@
   </head>
   <body>
     <!-- Background uses 6 layered gradients with different animation speeds -->
+
+    <!--
+      Feature Toggle Buttons
+      WHY: Positioned fixed for easy access, uses emoji for instant recognition
+      Hidden by default until features are activated
+    -->
+    <div class="feature-buttons" id="featureButtons">
+      <button id="rainbowBtn" class="feature-btn" title="Rainbow Paint" aria-label="Toggle rainbow paint mode">🌈</button>
+      <button id="bubblesBtn" class="feature-btn" title="Pop Bubbles" aria-label="Start bubble game">🫧</button>
+      <button id="colorBtn" class="feature-btn" title="Color Splash" aria-label="Toggle color splash mode">🎨</button>
+      <button id="cameraBtn" class="feature-btn" title="Face Filters" aria-label="Open camera with filters">📸</button>
+    </div>
+
+    <!--
+      Rainbow Trail Canvas
+      WHY: Separate canvas for drawing to avoid reflows/repaints of main DOM
+      Uses willChange hint for GPU acceleration
+    -->
+    <canvas id="rainbowCanvas" class="rainbow-canvas"></canvas>
+
+    <!-- Time-based greeting overlay -->
+    <div id="greetingOverlay" class="greeting-overlay"></div>
+
+
     <header class="site">
-      <h1>✨ hi, i'm <span class="accent">Ruby</span> ✨</h1>
-      <p class="tag">tiny adventures, huge vibes</p>
+      <!--
+        Click counter game: tapping name triggers achievement
+        WHY: data-clicks tracks without extra variables, fun family competition
+      -->
+      <h1 id="siteTitle" data-clicks="0">
+        ✨ hi, i'm <span class="accent" id="rubyName">Ruby</span> ✨
+      </h1>
+      <p class="tag" id="tagline">tiny adventures, huge vibes</p>
     </header>
 
     <main class="wrap">
-      <section class="card hero" aria-label="Featured photo and favorites">
+      <section class="card hero" aria-label="Featured photo and favorites" id="heroCard">
         <!-- All images auto-optimized via PicPerf: https://picperf.io/?utm_source=mr.sisk -->
         <img
           src="https://picperf.io/img/PXJ68F/ruby-curious-george.jpeg"
@@ -69,8 +104,8 @@
           decoding="async"
         />
         <div class="hero-copy">
-          <h2>latest favorite things</h2>
-          <ul>
+          <h2 id="favoritesTitle">latest favorite things</h2>
+          <ul id="favoritesList">
             <li>song: <em>ba ba black sheep</em></li>
             <li>snack: <em>mom's sourdough</em></li>
             <li>toy: <em>baby doll</em></li>
@@ -78,9 +113,12 @@
         </div>
       </section>
 
-      <!-- Polaroids use CSS custom properties for rotation angles and staggered float animations -->
-      <section class="grid" aria-label="Photo gallery">
-        <figure class="polaroid" tabindex="0">
+      <!--
+        Polaroids with color-splash capability
+        WHY: data-theme allows per-card theme changes without complex state management
+      -->
+      <section class="grid" aria-label="Photo gallery" id="photoGrid">
+        <figure class="polaroid color-splashable" tabindex="0" data-theme="0">
           <img
             src="https://picperf.io/img/PXJ68F/ruby-sunshine.jpeg"
             alt="Ruby being adorable"
@@ -89,7 +127,7 @@
           />
           <figcaption>pure sunshine</figcaption>
         </figure>
-        <figure class="polaroid" tabindex="0">
+        <figure class="polaroid color-splashable" tabindex="0" data-theme="0">
           <img
             src="https://picperf.io/img/PXJ68F/ruby-icecream.jpeg"
             alt="Ruby eating ice cream"
@@ -98,7 +136,7 @@
           />
           <figcaption>chaos coordinator</figcaption>
         </figure>
-        <figure class="polaroid" tabindex="0">
+        <figure class="polaroid color-splashable" tabindex="0" data-theme="0">
           <img
             src="https://picperf.io/img/PXJ68F/ruby-and-megan.jpeg"
             alt="Ruby and Mom"
@@ -110,14 +148,124 @@
       </section>
     </main>
 
-    <footer class="wrap foot">
+    <footer class="wrap foot" id="footer">
       <small
         >© <span id="year"></span> Ruby's dad. made with ☕ + 💖 + 🤖</small
       >
     </footer>
 
+
+    <!--
+      AR CAMERA WITH FACE FILTERS
+      WHY: Simple overlay positioning (not ML) for performance and broad compatibility
+      Kids position their face, select filter, snap photo
+    -->
+    <div id="arCamera" class="ar-camera">
+      <div class="camera-header">
+        <button id="closeCamera" class="close-btn" aria-label="Close camera">✕</button>
+        <div class="filter-selector" id="filterSelector">
+          <!-- Filter buttons populated dynamically -->
+        </div>
+      </div>
+      <div class="camera-viewport">
+        <video id="cameraVideo" autoplay playsinline></video>
+        <canvas id="cameraCanvas" class="camera-overlay"></canvas>
+      </div>
+      <div class="camera-controls">
+        <button id="capturePhoto" class="capture-btn" aria-label="Take photo">📸</button>
+        <button id="switchCamera" class="switch-btn" aria-label="Switch camera">🔄</button>
+      </div>
+    </div>
+
+
     <script>
-      // Console info for curious devs
+      /* ============================================
+         CONFIGURATION & INITIALIZATION
+         WHY: Centralized config makes features easy to toggle/tune
+         ============================================ */
+
+      const CONFIG = {
+        // Ruby's birthday for special effects (CUSTOMIZE THIS!)
+        birthday: { month: 1, day: 15 }, // January 15th - UPDATE THIS!
+
+        // Click game settings
+        clickGameTarget: 10, // Taps needed to win
+        clickGameTimeout: 3000, // Must complete within 3 seconds
+
+        // Bubble game settings
+        bubbleSpawnInterval: 1500, // New bubble every 1.5s
+        bubbleMaxCount: 5, // Reduced from 8
+        bubbleLifetime: 5000,
+
+        // Performance settings
+        particlePoolSize: 30, // Reduced from 50
+        maxActiveParticles: 20, // Reduced from 30
+      };
+
+      // Feature state management
+      // WHY: Single source of truth, easy to persist to localStorage
+      const FEATURES = {
+        rainbowMode: false,
+        bubblesActive: false,
+        colorSplashMode: false,
+        discoMode: false,
+      };
+
+      // Respect user's motion preferences globally
+      const prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+
+      /* ============================================
+         UTILITY FUNCTIONS
+         ============================================ */
+
+      // Throttle function for performance-critical events
+      // WHY: Prevents excessive event handler calls on scroll/shake/etc
+      function throttle(func, wait) {
+        let timeout = null;
+        let previous = 0;
+
+        return function(...args) {
+          const now = Date.now();
+          const remaining = wait - (now - previous);
+
+          if (remaining <= 0 || remaining > wait) {
+            if (timeout) {
+              clearTimeout(timeout);
+              timeout = null;
+            }
+            previous = now;
+            func.apply(this, args);
+          } else if (!timeout) {
+            timeout = setTimeout(() => {
+              previous = Date.now();
+              timeout = null;
+              func.apply(this, args);
+            }, remaining);
+          }
+        };
+      }
+
+      // Debounce for less critical events
+      // WHY: Waits for user to finish action before firing
+      function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+      }
+
+      // Random number helper
+      function rand(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      /* ============================================
+         CONSOLE BRANDING & INFO
+         ============================================ */
+
       console.log(
         "%cBuilt by Adam Sisk",
         "font-size: 20px; font-weight: bold; color: #ff6fa9; padding: 10px 0;"
@@ -132,6 +280,8 @@
         "%cSoftware Engineer • Made with vanilla JS, CSS animations, and Claude Sonnet 4.5",
         "font-size: 12px; color: #666; margin-top: 8px;"
       );
+
+      console.log("\n🎮 EASTER EGGS:\n- Tap Ruby's name 10 times fast\n- Try the Konami code: ↑↑↓↓←→←→\n- Shake your device\n- Check the feature buttons!");
 
       console.log("\n");
 
@@ -148,47 +298,933 @@
       // Set copyright year
       document.getElementById("year").textContent = new Date().getFullYear();
 
-      // Respect user's motion preferences
-      const prefersReducedMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
+      /* ============================================
+         MOBILE TOUCH OPTIMIZATIONS
+         WHY: Prevent double-tap zoom issues on rapid tapping
+         ============================================ */
 
-      if (!prefersReducedMotion) {
-        // Sparkle animation using RAF for 60fps performance
-        const sparkleEmojis = ["✨", "⭐", "💫", "🌟"];
-        let lastSparkleTime = 0;
-        const sparkleInterval = 800;
-
-        function createSparkle() {
-          const sparkle = document.createElement("div");
-          sparkle.className = "sparkle";
-          sparkle.textContent =
-            sparkleEmojis[Math.floor(Math.random() * sparkleEmojis.length)];
-          sparkle.style.left = Math.random() * 100 + "vw";
-          sparkle.style.animationDuration = Math.random() * 3 + 2 + "s";
-          sparkle.style.opacity = Math.random() * 0.5 + 0.3;
-          sparkle.style.fontSize = Math.random() * 1 + 0.5 + "rem";
-          document.body.appendChild(sparkle);
-
-          setTimeout(() => sparkle.remove(), 5000);
+      // Prevent double-tap zoom on buttons and interactive elements
+      // WHY: Kids will tap rapidly, we don't want zooming
+      document.addEventListener('touchstart', function(e) {
+        if (e.target.closest('.feature-btn, .polaroid, button, #rubyName')) {
+          e.preventDefault();
+          e.target.click();
         }
+      }, { passive: false });
 
-        function sparkleLoop(timestamp) {
-          if (timestamp - lastSparkleTime >= sparkleInterval) {
-            createSparkle();
-            lastSparkleTime = timestamp;
+      // Disable pinch zoom on game elements but allow on photos
+      // WHY: Games need precise tapping, but photos should be zoomable
+      let lastTouchEnd = 0;
+      document.addEventListener('touchend', function(e) {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+          if (!e.target.closest('.hero-img, .polaroid img')) {
+            e.preventDefault();
           }
-          requestAnimationFrame(sparkleLoop);
         }
+        lastTouchEnd = now;
+      }, false);
 
-        for (let i = 0; i < 5; i++) {
-          setTimeout(createSparkle, i * 200);
-        }
+      /* ============================================
+         PARTICLE BURST SYSTEM
+         WHY: Object pooling prevents GC pauses, maintains 60fps
+         Reuses DOM elements instead of creating/destroying
+         ============================================ */
 
-        requestAnimationFrame(sparkleLoop);
+      const particlePool = [];
+      const activeParticles = [];
+      const particleEmojis = ['✨', '⭐', '💫', '🌟', '💖', '🦋', '🌈', '🎀', '🎉'];
+
+      // Initialize particle pool
+      // WHY: Create elements once, reuse forever (no GC pressure)
+      for (let i = 0; i < CONFIG.particlePoolSize; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle-burst';
+        particle.style.position = 'fixed';
+        particle.style.pointerEvents = 'none';
+        particle.style.zIndex = '9998';
+        particle.style.fontSize = '1.5rem';
+        particlePool.push(particle);
       }
 
-      // Keyboard navigation focus management
+      function createParticleBurst(x, y) {
+        if (prefersReducedMotion) return;
+        if (activeParticles.length >= CONFIG.maxActiveParticles) return;
+
+        // Burst count based on available pool
+        const burstCount = Math.min(12, CONFIG.particlePoolSize - activeParticles.length);
+
+        for (let i = 0; i < burstCount; i++) {
+          const particle = particlePool.pop();
+          if (!particle) break;
+
+          // Random emoji from pool
+          particle.textContent = particleEmojis[Math.floor(Math.random() * particleEmojis.length)];
+
+          // Starting position
+          particle.style.left = x + 'px';
+          particle.style.top = y + 'px';
+          particle.style.opacity = '1';
+
+          // Random velocity direction
+          // WHY: Spread particles in all directions for satisfying burst effect
+          const angle = (i / burstCount) * Math.PI * 2;
+          const velocity = rand(50, 150);
+          const vx = Math.cos(angle) * velocity;
+          const vy = Math.sin(angle) * velocity;
+
+          document.body.appendChild(particle);
+          activeParticles.push(particle);
+
+          // Animate using RAF for smooth 60fps
+          animateParticle(particle, x, y, vx, vy);
+        }
+      }
+
+      function animateParticle(particle, startX, startY, vx, vy) {
+        const startTime = Date.now();
+        const duration = 800;
+        const gravity = 200; // pixels per second squared
+
+        function update() {
+          const elapsed = Date.now() - startTime;
+          const progress = elapsed / duration;
+
+          if (progress >= 1) {
+            // Animation complete, return to pool
+            particle.remove();
+            const idx = activeParticles.indexOf(particle);
+            if (idx > -1) activeParticles.splice(idx, 1);
+            particlePool.push(particle);
+            return;
+          }
+
+          // Physics: position = start + velocity*time + 0.5*gravity*time^2
+          const t = elapsed / 1000;
+          const x = startX + vx * t;
+          const y = startY + vy * t + 0.5 * gravity * t * t;
+
+          particle.style.left = x + 'px';
+          particle.style.top = y + 'px';
+          particle.style.opacity = 1 - progress;
+          particle.style.transform = `scale(${1 - progress * 0.5}) rotate(${progress * 180}deg)`;
+
+          requestAnimationFrame(update);
+        }
+
+        requestAnimationFrame(update);
+      }
+
+      // Attach particle burst to clicks/taps
+      document.addEventListener('click', function(e) {
+        // Don't burst on UI buttons to avoid visual clutter
+        if (e.target.closest('.feature-btn, .close-btn, button')) return;
+
+        createParticleBurst(e.clientX, e.clientY);
+      });
+
+      document.addEventListener('touchstart', function(e) {
+        if (e.target.closest('.feature-btn, .close-btn, button')) return;
+        const touch = e.touches[0];
+        createParticleBurst(touch.clientX, touch.clientY);
+      }, { passive: true });
+
+      /* ============================================
+         RAINBOW TRAIL MODE
+         WHY: Canvas-based drawing for performance
+         Circular buffer prevents memory leaks
+         ============================================ */
+
+      const rainbowCanvas = document.getElementById('rainbowCanvas');
+      const rainbowCtx = rainbowCanvas.getContext('2d', { alpha: true });
+      let rainbowTrailPoints = [];
+      const maxTrailPoints = 50; // Circular buffer size
+      let rainbowHue = 0;
+
+      // Set canvas size to match window
+      function resizeRainbowCanvas() {
+        rainbowCanvas.width = window.innerWidth;
+        rainbowCanvas.height = window.innerHeight;
+      }
+      resizeRainbowCanvas();
+      window.addEventListener('resize', debounce(resizeRainbowCanvas, 250));
+
+      function addRainbowPoint(x, y) {
+        if (!FEATURES.rainbowMode) return;
+
+        rainbowTrailPoints.push({ x, y, hue: rainbowHue });
+        rainbowHue = (rainbowHue + 2) % 360;
+
+        // Circular buffer: remove old points
+        if (rainbowTrailPoints.length > maxTrailPoints) {
+          rainbowTrailPoints.shift();
+        }
+      }
+
+      function drawRainbowTrail() {
+        if (!FEATURES.rainbowMode || prefersReducedMotion) return;
+
+        // Clear canvas with fade effect
+        // WHY: Fade creates beautiful trailing effect without manual point removal
+        rainbowCtx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+        rainbowCtx.fillRect(0, 0, rainbowCanvas.width, rainbowCanvas.height);
+
+        // Draw trail
+        if (rainbowTrailPoints.length < 2) return;
+
+        rainbowCtx.lineCap = 'round';
+        rainbowCtx.lineJoin = 'round';
+
+        for (let i = 1; i < rainbowTrailPoints.length; i++) {
+          const p1 = rainbowTrailPoints[i - 1];
+          const p2 = rainbowTrailPoints[i];
+
+          rainbowCtx.beginPath();
+          rainbowCtx.moveTo(p1.x, p1.y);
+          rainbowCtx.lineTo(p2.x, p2.y);
+          rainbowCtx.strokeStyle = `hsla(${p2.hue}, 100%, 60%, ${i / rainbowTrailPoints.length})`;
+          rainbowCtx.lineWidth = 5 + (i / rainbowTrailPoints.length) * 10;
+          rainbowCtx.stroke();
+        }
+      }
+
+      // Track mouse/touch for rainbow trail
+      document.addEventListener('mousemove', function(e) {
+        if (FEATURES.rainbowMode) {
+          addRainbowPoint(e.clientX, e.clientY);
+        }
+      });
+
+      document.addEventListener('touchmove', function(e) {
+        if (FEATURES.rainbowMode) {
+          const touch = e.touches[0];
+          addRainbowPoint(touch.clientX, touch.clientY);
+        }
+      }, { passive: true });
+
+      // Toggle rainbow mode
+      document.getElementById('rainbowBtn').addEventListener('click', function() {
+        FEATURES.rainbowMode = !FEATURES.rainbowMode;
+        this.classList.toggle('active', FEATURES.rainbowMode);
+
+        if (FEATURES.rainbowMode) {
+          rainbowCanvas.classList.add('active');
+        } else {
+          rainbowCanvas.classList.remove('active');
+          // Clear canvas
+          rainbowCtx.clearRect(0, 0, rainbowCanvas.width, rainbowCanvas.height);
+          rainbowTrailPoints = [];
+        }
+      });
+
+      /* ============================================
+         POP THE BUBBLES GAME
+         WHY: RAF-based animation, object pooling for performance
+         Touch-optimized hit detection
+         ============================================ */
+
+      const bubblePool = [];
+      const activeBubbles = [];
+      let bubbleSpawnTimer = null;
+      let popCount = 0;
+
+      // Initialize bubble pool
+      for (let i = 0; i < CONFIG.bubbleMaxCount; i++) {
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.innerHTML = '🫧';
+        bubble.style.position = 'fixed';
+        bubble.style.cursor = 'pointer';
+        bubble.style.fontSize = '2rem';
+        bubble.style.zIndex = '9997';
+        bubble.style.pointerEvents = 'auto';
+        bubblePool.push(bubble);
+      }
+
+      function spawnBubble() {
+        if (activeBubbles.length >= CONFIG.bubbleMaxCount) return;
+
+        const bubble = bubblePool.pop();
+        if (!bubble) return;
+
+        // Random position at bottom of screen
+        const x = rand(10, window.innerWidth - 50);
+        const y = window.innerHeight + 50;
+
+        bubble.style.left = x + 'px';
+        bubble.style.top = y + 'px';
+        bubble.style.opacity = '1';
+        bubble.style.transform = 'scale(1)';
+
+        document.body.appendChild(bubble);
+        activeBubbles.push(bubble);
+
+        // Animate bubble floating up
+        // WHY: Different speeds and wobble make it more playful
+        const speed = rand(50, 120); // pixels per second
+        const wobble = rand(-20, 20);
+        animateBubble(bubble, x, y, speed, wobble);
+
+        // Auto-remove after lifetime
+        setTimeout(() => {
+          if (bubble.parentNode) {
+            popBubble(bubble, false);
+          }
+        }, CONFIG.bubbleLifetime);
+      }
+
+      function animateBubble(bubble, startX, startY, speed, wobble) {
+        const startTime = Date.now();
+
+        function update() {
+          if (!bubble.parentNode) return; // Already popped
+
+          const elapsed = (Date.now() - startTime) / 1000;
+          const y = startY - speed * elapsed;
+          const x = startX + Math.sin(elapsed * 2) * wobble;
+
+          bubble.style.left = x + 'px';
+          bubble.style.top = y + 'px';
+
+          // Remove if off-screen
+          if (y < -100) {
+            popBubble(bubble, false);
+            return;
+          }
+
+          requestAnimationFrame(update);
+        }
+
+        requestAnimationFrame(update);
+      }
+
+      function popBubble(bubble, wasClicked) {
+        if (!bubble.parentNode) return;
+
+        if (wasClicked) {
+          popCount++;
+          // Pop animation
+          bubble.style.transform = 'scale(1.5)';
+          bubble.style.opacity = '0';
+          bubble.innerHTML = '💥';
+
+          // Particle burst at bubble location
+          const rect = bubble.getBoundingClientRect();
+          createParticleBurst(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        }
+
+        setTimeout(() => {
+          bubble.remove();
+          const idx = activeBubbles.indexOf(bubble);
+          if (idx > -1) activeBubbles.splice(idx, 1);
+          bubblePool.push(bubble);
+          bubble.innerHTML = '🫧';
+          bubble.style.transform = 'scale(1)';
+          bubble.style.opacity = '1';
+        }, 300);
+      }
+
+      // Click handler for bubbles
+      document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('bubble')) {
+          popBubble(e.target, true);
+        }
+      });
+
+      // Toggle bubbles game
+      document.getElementById('bubblesBtn').addEventListener('click', function() {
+        FEATURES.bubblesActive = !FEATURES.bubblesActive;
+        this.classList.toggle('active', FEATURES.bubblesActive);
+
+        if (FEATURES.bubblesActive) {
+          popCount = 0;
+          // Start spawning bubbles
+          bubbleSpawnTimer = setInterval(spawnBubble, CONFIG.bubbleSpawnInterval);
+          spawnBubble(); // Spawn one immediately
+        } else {
+          // Stop and clean up
+          if (bubbleSpawnTimer) {
+            clearInterval(bubbleSpawnTimer);
+            bubbleSpawnTimer = null;
+          }
+          // Remove all active bubbles
+          activeBubbles.forEach(b => b.remove());
+          activeBubbles.length = 0;
+          bubblePool.push(...activeBubbles.splice(0));
+
+          // Log score to console
+          if (popCount > 0) {
+            console.log(`🎉 You popped ${popCount} bubbles!`);
+          }
+        }
+      });
+
+      /* ============================================
+         COLOR SPLASH MODE
+         WHY: Predefined color themes ensure everything looks cute
+         No ugly combinations possible!
+         ============================================ */
+
+      const colorThemes = [
+        { name: 'original', bg: 'rgba(255, 255, 255, 0.95)', border: 'rgba(255, 255, 255, 0.8)', caption: 'linear-gradient(90deg, #ff6fa9, #ff8fc7, #c084fc)' },
+        { name: 'peachy', bg: 'rgba(255, 236, 214, 0.95)', border: 'rgba(255, 207, 168, 0.8)', caption: 'linear-gradient(90deg, #ff8b66, #ffab91, #ff6f61)' },
+        { name: 'minty', bg: 'rgba(214, 255, 236, 0.95)', border: 'rgba(168, 255, 207, 0.8)', caption: 'linear-gradient(90deg, #66ffa5, #91ffab, #61ff8b)' },
+        { name: 'lavender', bg: 'rgba(234, 221, 255, 0.95)', border: 'rgba(207, 180, 255, 0.8)', caption: 'linear-gradient(90deg, #b19cd9, #d4a5ff, #9370db)' },
+        { name: 'sunny', bg: 'rgba(255, 250, 205, 0.95)', border: 'rgba(255, 239, 153, 0.8)', caption: 'linear-gradient(90deg, #ffd700, #ffed4e, #ffb347)' },
+      ];
+
+      document.getElementById('colorBtn').addEventListener('click', function() {
+        FEATURES.colorSplashMode = !FEATURES.colorSplashMode;
+        this.classList.toggle('active', FEATURES.colorSplashMode);
+
+        if (FEATURES.colorSplashMode) {
+          // Enable clicking on polaroids to cycle colors
+          document.querySelectorAll('.color-splashable').forEach(el => {
+            el.style.cursor = 'pointer';
+            el.addEventListener('click', cycleColor);
+          });
+        } else {
+          // Disable and reset
+          document.querySelectorAll('.color-splashable').forEach(el => {
+            el.style.cursor = '';
+            el.removeEventListener('click', cycleColor);
+            el.dataset.theme = '0';
+            applyColorTheme(el, 0);
+          });
+        }
+      });
+
+      function cycleColor(e) {
+        if (!FEATURES.colorSplashMode) return;
+
+        const el = e.currentTarget;
+        let themeIndex = parseInt(el.dataset.theme || '0');
+        themeIndex = (themeIndex + 1) % colorThemes.length;
+        el.dataset.theme = themeIndex;
+
+        applyColorTheme(el, themeIndex);
+      }
+
+      function applyColorTheme(el, index) {
+        const theme = colorThemes[index];
+        el.style.background = `linear-gradient(145deg, ${theme.bg}, ${theme.bg})`;
+        el.style.borderColor = theme.border;
+        const caption = el.querySelector('figcaption');
+        if (caption) {
+          caption.style.background = theme.caption;
+          caption.style.webkitBackgroundClip = 'text';
+          caption.style.backgroundClip = 'text';
+          caption.style.webkitTextFillColor = 'transparent';
+        }
+      }
+
+      /* ============================================
+         CLICK COUNTER GAME
+         WHY: Fun family competition, localStorage leaderboard
+         Tap Ruby's name 10 times in 3 seconds to win
+         ============================================ */
+
+      let clickGameStartTime = 0;
+      let clickGameActive = false;
+
+      document.getElementById('rubyName').addEventListener('click', function(e) {
+        const title = document.getElementById('siteTitle');
+        let clicks = parseInt(title.dataset.clicks || '0');
+
+        if (!clickGameActive) {
+          // Start game
+          clickGameActive = true;
+          clickGameStartTime = Date.now();
+          clicks = 1;
+          title.dataset.clicks = clicks;
+
+          // Visual feedback
+          this.style.transform = 'scale(1.2) rotate(-5deg)';
+          setTimeout(() => {
+            this.style.transform = '';
+          }, 100);
+
+          // Reset after timeout
+          setTimeout(() => {
+            if (clicks < CONFIG.clickGameTarget) {
+              clickGameActive = false;
+              title.dataset.clicks = '0';
+            }
+          }, CONFIG.clickGameTimeout);
+        } else {
+          clicks++;
+          title.dataset.clicks = clicks;
+
+          // Visual feedback
+          this.style.transform = `scale(${1 + clicks * 0.05}) rotate(${clicks % 2 ? -5 : 5}deg)`;
+          setTimeout(() => {
+            this.style.transform = '';
+          }, 100);
+
+          // Check win condition
+          if (clicks >= CONFIG.clickGameTarget) {
+            const elapsed = Date.now() - clickGameStartTime;
+            clickGameActive = false;
+            title.dataset.clicks = '0';
+
+            // Save to leaderboard
+            saveScore(elapsed);
+          }
+        }
+      });
+
+      function saveScore(time) {
+        // Get leaderboard from localStorage
+        let scores = JSON.parse(localStorage.getItem('rubyClickScores') || '[]');
+
+        // Add new score
+        scores.push({
+          time,
+          date: new Date().toISOString(),
+          taps: CONFIG.clickGameTarget,
+        });
+
+        // Keep top 10
+        scores.sort((a, b) => a.time - b.time);
+        scores = scores.slice(0, 10);
+
+        localStorage.setItem('rubyClickScores', JSON.stringify(scores));
+
+        // Log to console for feedback
+        console.log(`🎉 You won! ${(time / 1000).toFixed(2)}s`);
+        console.log('🏆 Leaderboard:', scores.map((s, i) => `${i + 1}. ${(s.time / 1000).toFixed(2)}s`));
+      }
+
+      /* ============================================
+         KONAMI CODE EASTER EGG
+         WHY: Classic easter egg, activates DISCO MODE
+         Mobile: Swipe pattern detection
+         ============================================ */
+
+      const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight'];
+      let konamiProgress = 0;
+
+      document.addEventListener('keydown', function(e) {
+        if (e.key === konamiCode[konamiProgress]) {
+          konamiProgress++;
+          if (konamiProgress === konamiCode.length) {
+            activateDiscoMode();
+            konamiProgress = 0;
+          }
+        } else {
+          konamiProgress = 0;
+        }
+      });
+
+      // Mobile swipe detection for Konami code
+      let touchStartX = 0;
+      let touchStartY = 0;
+      const swipeThreshold = 50;
+
+      document.addEventListener('touchstart', function(e) {
+        const touch = e.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+      }, { passive: true });
+
+      document.addEventListener('touchend', function(e) {
+        const touch = e.changedTouches[0];
+        const deltaX = touch.clientX - touchStartX;
+        const deltaY = touch.clientY - touchStartY;
+
+        let direction = null;
+
+        if (Math.abs(deltaY) > Math.abs(deltaX)) {
+          if (Math.abs(deltaY) > swipeThreshold) {
+            direction = deltaY < 0 ? 'ArrowUp' : 'ArrowDown';
+          }
+        } else {
+          if (Math.abs(deltaX) > swipeThreshold) {
+            direction = deltaX < 0 ? 'ArrowLeft' : 'ArrowRight';
+          }
+        }
+
+        if (direction && direction === konamiCode[konamiProgress]) {
+          konamiProgress++;
+          if (konamiProgress === konamiCode.length) {
+            activateDiscoMode();
+            konamiProgress = 0;
+          }
+        } else if (direction) {
+          konamiProgress = 0;
+        }
+      }, { passive: true });
+
+      function activateDiscoMode() {
+        if (FEATURES.discoMode) return; // Already active
+
+        FEATURES.discoMode = true;
+        document.body.classList.add('disco-mode');
+
+        console.log('🕺 DISCO MODE ACTIVATED! 🪩');
+
+        // Auto-disable after 10 seconds
+        setTimeout(() => {
+          FEATURES.discoMode = false;
+          document.body.classList.remove('disco-mode');
+        }, 10000);
+      }
+
+      /* ============================================
+         SHAKE FOR SURPRISE
+         WHY: DeviceMotion API for mobile, rapid mouse movement for desktop
+         Throttled to prevent battery drain
+         ============================================ */
+
+      let lastShakeTime = 0;
+      const shakeThreshold = 15;
+      const shakeCooldown = 2000; // 2 seconds between shakes
+
+      if (window.DeviceMotionEvent) {
+        window.addEventListener('devicemotion', throttle(function(e) {
+          const acc = e.accelerationIncludingGravity;
+          if (!acc) return;
+
+          const magnitude = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
+
+          if (magnitude > shakeThreshold) {
+            const now = Date.now();
+            if (now - lastShakeTime > shakeCooldown) {
+              lastShakeTime = now;
+              triggerShakeSurprise();
+            }
+          }
+        }, 100));
+      }
+
+      // Desktop: rapid mouse movement detection
+      let lastMouseX = 0;
+      let lastMouseY = 0;
+      let mouseVelocity = 0;
+
+      document.addEventListener('mousemove', throttle(function(e) {
+        const deltaX = e.clientX - lastMouseX;
+        const deltaY = e.clientY - lastMouseY;
+        mouseVelocity = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+        if (mouseVelocity > 100) {
+          const now = Date.now();
+          if (now - lastShakeTime > shakeCooldown) {
+            lastShakeTime = now;
+            triggerShakeSurprise();
+          }
+        }
+
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+      }, 50));
+
+      function triggerShakeSurprise() {
+        // Random theme color shift
+        const colors = ['#ffe6f3', '#e6f3ff', '#fff3e6', '#f3e6ff', '#e6fff3'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        document.documentElement.style.setProperty('--bg', randomColor);
+        document.getElementById('theme-color-meta').content = randomColor;
+
+        console.log('✨ Theme color changed! ✨');
+      }
+
+      /* ============================================
+         TIME-BASED SURPRISES
+         WHY: Personalized greetings, birthday special effects
+         ============================================ */
+
+      function initTimeBasedFeatures() {
+        const now = new Date();
+        const hour = now.getHours();
+        const month = now.getMonth() + 1;
+        const day = now.getDate();
+
+        // Check if it's Ruby's birthday!
+        if (month === CONFIG.birthday.month && day === CONFIG.birthday.day) {
+          activateBirthdayMode();
+          return;
+        }
+
+        // Time-based greeting
+        let greeting = '';
+        if (hour < 6) {
+          greeting = '🌙 sweet dreams, Ruby';
+        } else if (hour < 12) {
+          greeting = '🌅 good morning, sunshine!';
+        } else if (hour < 18) {
+          greeting = '☀️ happy afternoon!';
+        } else if (hour < 22) {
+          greeting = '🌆 good evening, Ruby!';
+        } else {
+          greeting = '✨ bedtime soon, little one';
+        }
+
+        // Show greeting briefly
+        showGreeting(greeting);
+
+        // Adjust tagline based on time
+        const tagline = document.getElementById('tagline');
+        if (hour < 6 || hour >= 22) {
+          tagline.textContent = 'dreaming of tomorrow';
+        } else if (hour < 12) {
+          tagline.textContent = 'ready for adventures!';
+        }
+      }
+
+      function showGreeting(text) {
+        const overlay = document.getElementById('greetingOverlay');
+        overlay.textContent = text;
+        overlay.classList.add('active');
+
+        setTimeout(() => {
+          overlay.classList.remove('active');
+        }, 3000);
+      }
+
+      function activateBirthdayMode() {
+        document.body.classList.add('birthday-mode');
+        showGreeting('🎂 HAPPY BIRTHDAY RUBY! 🎉');
+
+        // Update header
+        document.getElementById('siteTitle').innerHTML =
+          '🎂 hi, i\'m <span class="accent" id="rubyName">Ruby</span> 🎂';
+      }
+
+      // Initialize time-based features
+      initTimeBasedFeatures();
+
+      /* ============================================
+         AR CAMERA WITH FACE FILTERS
+         WHY: Simple overlay filters (no ML) for broad compatibility
+         Kids position face, select filter, snap photo
+         ============================================ */
+
+      const filters = [
+        { name: 'crown', emoji: '👑', position: 'top' },
+        { name: 'sunglasses', emoji: '😎', position: 'center' },
+        { name: 'heart-eyes', emoji: '😍', position: 'center' },
+        { name: 'unicorn', emoji: '🦄', position: 'top' },
+        { name: 'butterfly', emoji: '🦋', position: 'top' },
+        { name: 'sparkles', emoji: '✨', position: 'top' },
+      ];
+
+      let currentFilter = null;
+      let cameraStream = null;
+      let facingMode = 'user'; // 'user' or 'environment'
+
+      // Populate filter selector
+      const filterSelector = document.getElementById('filterSelector');
+      filters.forEach(filter => {
+        const btn = document.createElement('button');
+        btn.className = 'filter-btn';
+        btn.textContent = filter.emoji;
+        btn.title = filter.name;
+        btn.addEventListener('click', (e) => selectFilter(filter, e.target));
+        filterSelector.appendChild(btn);
+      });
+
+      function selectFilter(filter, btnElement) {
+        currentFilter = filter;
+        // Update active state
+        filterSelector.querySelectorAll('.filter-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        btnElement.classList.add('active');
+      }
+
+      document.getElementById('cameraBtn').addEventListener('click', openCamera);
+
+      async function openCamera() {
+        const camera = document.getElementById('arCamera');
+        const video = document.getElementById('cameraVideo');
+
+        try {
+          cameraStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: facingMode },
+            audio: false
+          });
+
+          video.srcObject = cameraStream;
+          camera.classList.add('active');
+
+          // Set canvas size to match video
+          video.addEventListener('loadedmetadata', () => {
+            const canvas = document.getElementById('cameraCanvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+          });
+
+        } catch (error) {
+          console.error('Camera access denied:', error);
+          alert('📸 Camera access needed for filters!');
+        }
+      }
+
+      function drawCameraFilter() {
+        if (!currentFilter || !cameraStream) return;
+
+        const canvas = document.getElementById('cameraCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw filter emoji
+        // WHY: Simple positioning based on filter type, kids adjust their face
+        ctx.font = '100px Arial';
+        ctx.textAlign = 'center';
+
+        let y = canvas.height * 0.2; // Top position
+        if (currentFilter.position === 'center') {
+          y = canvas.height * 0.5;
+        }
+
+        ctx.fillText(currentFilter.emoji, canvas.width / 2, y);
+      }
+
+      document.getElementById('closeCamera').addEventListener('click', function() {
+        if (cameraStream) {
+          cameraStream.getTracks().forEach(track => track.stop());
+          cameraStream = null;
+        }
+        document.getElementById('arCamera').classList.remove('active');
+        currentFilter = null;
+      });
+
+      document.getElementById('switchCamera').addEventListener('click', async function() {
+        facingMode = facingMode === 'user' ? 'environment' : 'user';
+
+        // Restart camera with new facing mode
+        if (cameraStream) {
+          cameraStream.getTracks().forEach(track => track.stop());
+        }
+        await openCamera();
+      });
+
+      document.getElementById('capturePhoto').addEventListener('click', function() {
+        const video = document.getElementById('cameraVideo');
+        const canvas = document.getElementById('cameraCanvas');
+        const captureCanvas = document.createElement('canvas');
+
+        captureCanvas.width = video.videoWidth;
+        captureCanvas.height = video.videoHeight;
+
+        const ctx = captureCanvas.getContext('2d');
+
+        // Draw video frame
+        ctx.drawImage(video, 0, 0);
+
+        // Draw filter overlay
+        if (currentFilter) {
+          ctx.drawImage(canvas, 0, 0);
+        }
+
+        // Convert to data URL and download
+        const dataUrl = captureCanvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = `ruby-filter-${Date.now()}.png`;
+        link.click();
+
+        console.log('📸 Photo saved!');
+      });
+
+
+
+      /* ============================================
+         CURSOR FRIENDS (DESKTOP ONLY)
+         WHY: Cute emoji followers that trail the cursor with spring physics
+         Desktop-only since mobile uses touch and doesn't have a cursor
+         ============================================ */
+
+      // Only initialize on desktop (not mobile/touch devices)
+      if (window.innerWidth > 768 && !('ontouchstart' in window)) {
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let butterflyX = mouseX;
+        let butterflyY = mouseY;
+        let butterflyVx = 0;
+        let butterflyVy = 0;
+
+        // Create butterfly element
+        const butterfly = document.createElement('div');
+        butterfly.className = 'cursor-friend';
+        butterfly.textContent = '🦋';
+        butterfly.style.position = 'fixed';
+        butterfly.style.pointerEvents = 'none';
+        butterfly.style.zIndex = '9999';
+        butterfly.style.fontSize = '1.5rem';
+        butterfly.style.left = '0';
+        butterfly.style.top = '0';
+        document.body.appendChild(butterfly);
+
+        // Track mouse position
+        document.addEventListener('mousemove', (e) => {
+          mouseX = e.clientX;
+          mouseY = e.clientY;
+        });
+
+        // Animation update with delay-based trailing
+        // WHY: Single butterfly with delay creates trailing effect (up and to the left)
+        window.updateCursorFriends = function() {
+          const spring = 0.03;
+          const damping = 0.85;
+          const delay = 40; // Distance behind cursor
+
+          // Calculate distance to target (cursor minus delay creates trailing)
+          const dx = mouseX - butterflyX - delay;
+          const dy = mouseY - butterflyY - delay;
+
+          // Apply spring physics
+          butterflyVx += dx * spring;
+          butterflyVy += dy * spring;
+          butterflyVx *= damping;
+          butterflyVy *= damping;
+
+          // Update position
+          butterflyX += butterflyVx;
+          butterflyY += butterflyVy;
+
+          // Render
+          butterfly.style.transform = `translate(${butterflyX}px, ${butterflyY}px)`;
+        };
+      } else {
+        // No cursor friends on mobile, create no-op function
+        window.updateCursorFriends = function() {};
+      }
+
+      /* ============================================
+         UNIFIED GAME LOOP
+         WHY: Single RAF loop for all animations improves performance
+         Consolidates rainbow trail, camera filter, and cursor friends
+         ============================================ */
+
+      function gameLoop() {
+        // Update rainbow trail (only if active)
+        if (FEATURES.rainbowMode) {
+          drawRainbowTrail();
+        }
+
+        // Update camera filter (only if active)
+        if (currentFilter && cameraStream) {
+          drawCameraFilter();
+        }
+
+        // Update cursor friends (desktop only, always runs)
+        window.updateCursorFriends();
+
+        requestAnimationFrame(gameLoop);
+      }
+
+      // Start the unified game loop
+      gameLoop();
+
+      /* ============================================
+         KEYBOARD NAVIGATION
+         WHY: Accessibility matters, even in fun projects
+         ============================================ */
+
       document.addEventListener("keydown", function (e) {
         if (e.key === "Tab") {
           document.body.classList.add("keyboard-nav");
@@ -198,6 +1234,10 @@
       document.addEventListener("mousedown", function () {
         document.body.classList.remove("keyboard-nav");
       });
+
+      // Log successful initialization
+      console.log('%c✨ Ruby\'s Magic Site Fully Loaded! ✨',
+        'font-size: 16px; color: #ff6fa9; font-weight: bold;');
     </script>
   </body>
 </html>
